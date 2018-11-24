@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [ $# -ne 0 ]
+then
+  containername=$@
+else
+  echo "Please specify a container name!"
+  echo "  $0 containername"
+  exit 1
+fi
+
+# Check if container exists
+docker container ps --all |grep $containername > /dev/null
+if [ $? -eq 0 ]
+then
+  docker container restart $containername
+  docker attach $containername
+else
+  echo "Adding new container $containername!"
+  docker run --name $containername -v $(pwd):/root -it alpine-bash /bin/bash
+fi
+

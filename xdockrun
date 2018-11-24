@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ $# -ne 0 ]
+then
+  containername=$@
+else
+  echo "Please specify a container name!"
+  echo "  $0 containername"
+  exit 1
+fi
+
+# Check if container exists
+docker container ps --all |grep $containername > /dev/null
+if [ $? -eq 0 ]
+then
+  docker container restart $containername
+  docker attach $containername
+else
+  echo "Adding new container $containername!"
+  docker run -d --name $containername -e DISPLAY=host.docker.internal:0 -v /private/tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/root -it alpine /bin/bash
+fi

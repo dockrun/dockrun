@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ $# -ne 0 ]
+then
+  containername=$@
+else
+  echo "Please specify a container name!"
+  echo "  $0 containername"
+  exit 1
+fi
+
+# Check if container exists
+docker container ps --all |grep $containername > /dev/null
+if [ $? -eq 0 ]
+then
+  docker container rm $containername
+else
+  echo "Container does not exist!"
+  exit 2
+fi
+
