@@ -4,4 +4,8 @@ Simple scripts for interactive prompts within alpine docker container, and simpl
 
 ## Create base container
 
-  docker build -t alpine-bash .
+Just build the Dockerfile in this repo as alpine-bash:
+
+```
+docker build -t alpine-bash .
+```
