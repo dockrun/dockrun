@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Remove all images containing dockrun
+images=$(docker images |grep dockrun |grep image |awk '{print $3}')
+
+for image in $images
+do
+  docker rmi $image
+done
+

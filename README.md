@@ -1,43 +1,32 @@
 # dockrun
 
-Simple scripts for interactive prompts within alpine docker container, and simple aliased removal of docker contaners.
+Simple scripts for running commands within alpine docker container, and simple aliased removal of docker images.
 
-## Installation
-
-Create base container and add scripts to PATH.
-
-1. Just build the Dockerfile in this repo as alpine-bash:
+## Install
 
 ```
-docker build -t alpine-bash .
-```
-
-2. Add the following to ~/.bashrc (Linux) or ~/.bash_profile (mac):
-
-```
-export PATH=/path/to/repo/bin:$PATH
+make install
 ```
 
 ## Usage
 
-Create or start container of name NAME and get an interactive shell:
+Run a command in container
 
 ```
-dockrun NAME
+dockrun command [command arguments]
 ```
 
-Remove said container:
+Remove the image associated with certain command.
 
 ```
-dockrm NAME
+dockrm command
 ```
 
-## Removal
-
-Just remove all containers created as well base image created earlier.
+## Uninstall
 
 ```
-docker container rm NAME
-docker rmi alpine-bash
+make uninstall
+# If you wish to remove all images created by dockrun
+make purge
 ```
 
