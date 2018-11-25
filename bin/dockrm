@@ -2,18 +2,18 @@
 
 if [ $# -ne 0 ]
 then
-  containername=$@
+  imagename=dockrun-$@-image
 else
-  echo "Please specify a container name!"
-  echo "  $0 containername"
+  echo "Please specify an image name!"
+  echo "  $0 imagename"
   exit 1
 fi
 
 # Check if container exists
-docker container ps --all |grep $containername > /dev/null
+docker images |grep $imagename > /dev/null
 if [ $? -eq 0 ]
 then
-  docker container rm $containername
+  docker rmi $imagename
 else
   echo "Container does not exist!"
   exit 2
