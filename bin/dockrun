@@ -1,18 +1,65 @@
 #!/bin/bash
 
+usage()
+{
+  appName=$1
+  errorMsg=$2
+  errorCode=$3
+
+  if [ "$appName" == "" ]; then
+    appName=dockrun
+  fi
+
+  if [ "$errorMsg" != "" ]; then
+    echo "ERROR: $errorMsg"
+    echo ""
+  fi
+
+  echo "$appName [arguments] executeable [executableArguments]"
+  echo "    -h --help"
+  echo "    --package=package-name      Name of package to install from alpine repositories. Default is same as executable name."
+  echo ""
+
+  if [ "$errorCode" != "" ]; then
+    exit $errorCode
+  fi
+  exit 1
+}
+
+# Capture empty run
 if [ $# -eq 0 ]
 then
-  echo "Please specify a command to run!"
-  echo "  $0 command [arguments]"
-  exit 1
+  usage $0 "Incorrect usage!" 2
 fi
 
+# Parse args
+while [ "$(echo $1 | head -c 1)" == "-" ]; do
+  PARAM=`echo $1 | awk -F= '{print $1}'`
+  VALUE=`echo $1 | awk -F= '{print $2}'`
+  case $PARAM in
+    -h | --help)
+      usage $0
+      exit
+      ;;
+    --package)
+      package=$VALUE
+      ;;
+  esac
+  shift
+done
+
+# All set, go!
+app=$1
+arguments="${@:2}"
 dateStr=$(date +%Y-%m-%d_%H:%M)
+
+if [ "$package" == "" ]
+then
+  package=$app
+fi
 
 containername=dockrun-$1
 imagename=$containername-image
-app=$1
-arguments="${@:2}"
 
 dfiledir=$HOME/.dockrun/$imagename-$dateStr
 dfile=$dfiledir/Dockerfile
@@ -32,17 +79,17 @@ then
   # Build an image containing our command
   cat > $dfile << _EOF_
 FROM alpine:latest
-RUN apk update && apk add $app
+RUN apk update && apk add $package
 WORKDIR /root
 _EOF_
-  docker build -t $imagename $dfiledir
+docker build -t $imagename $dfiledir
 
-  if [ $? -ne 0 ]
-  then
-    echo "Failed to build docker container!"
-    exit 2
-  fi
-  rm -rf $dfiledir
+if [ $? -ne 0 ]
+then
+  echo "Failed to build docker container!"
+  exit 2
+fi
+rm -rf $dfiledir
 fi
 
 # Run a container of said image, then cleanup
