@@ -17,13 +17,41 @@ usage()
 
   echo "$appName [arguments] executeable [executableArguments]"
   echo "    -h --help"
-  echo "    --package=package-name      Name of package to install from alpine repositories. Default is same as executable name."
+  echo "    --package=package-name      Name of package to install from alpine repositories. If specified, container base image is always (re)built. Default is same as executable name."
   echo ""
 
   if [ "$errorCode" != "" ]; then
     exit $errorCode
   fi
   exit 1
+}
+
+buildimage()
+{
+  imagename=$1
+  package=$2
+  dfiledir=$3
+
+  echo ""
+  echo "Building new image $imagename"
+  echo "---"
+  # Pull latest alpine (our base)
+  docker pull alpine
+
+  # Build an image containing our command
+  cat > $dfile << _EOF_
+FROM alpine:latest
+RUN apk update && apk add $package
+WORKDIR /root
+_EOF_
+docker build -t $imagename $dfiledir
+
+  if [ $? -ne 0 ]
+  then
+    echo "Failed to build docker container!"
+    exit 2
+  fi
+  rm -rf $dfiledir
 }
 
 # Capture empty run
@@ -48,14 +76,18 @@ while [ "$(echo $1 | head -c 1)" == "-" ]; do
   shift
 done
 
-# All set, go!
+# Some params needed
+dockRm=$(dirname $0)/dockrm
 app=$1
 arguments="${@:2}"
 dateStr=$(date +%Y-%m-%d_%H:%M)
 
+# If the user did not specify package, use app name
 if [ "$package" == "" ]
 then
   package=$app
+else # If user specified package, force building base image
+  forceBuild=true
 fi
 
 containername=dockrun-$1
@@ -65,31 +97,17 @@ dfiledir=$HOME/.dockrun/$imagename-$dateStr
 dfile=$dfiledir/Dockerfile
 mkdir -p $dfiledir
 
-# Check if an image already exists
+# Check if an image already exists, if not build it
 docker images |grep $imagename > /dev/null
-if [ $? -ne 0 ]
+imageExist=$?
+
+if [ $imageExist -ne 0 ]
 then
-  echo ""
-  echo "Building new image $imagename"
-  echo "---"
-
-  # Pull latest alpine (our base)
-  docker pull alpine
-
-  # Build an image containing our command
-  cat > $dfile << _EOF_
-FROM alpine:latest
-RUN apk update && apk add $package
-WORKDIR /root
-_EOF_
-docker build -t $imagename $dfiledir
-
-if [ $? -ne 0 ]
+  buildimage $imagename $package $dfiledir
+elif [ $forceBuild ]
 then
-  echo "Failed to build docker container!"
-  exit 2
-fi
-rm -rf $dfiledir
+  $dockRm $app $arguments
+  buildimage $imagename $package $dfiledir
 fi
 
 # Run a container of said image, then cleanup
