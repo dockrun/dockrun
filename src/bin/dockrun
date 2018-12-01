@@ -21,8 +21,12 @@ usage()
   echo "$appName [arguments] executeable [executableArguments]"
   echo ""
   echo "    -h, --help"                                             Prints this help text.
-  echo "    -p package-name, --package=package-name                 Name of package to install from alpine repositories. If specified, container base image is always (re)built. Default is same as executable name."
-  echo "    -r requirements-file, --requirements=requirements-file  Use a requirements file specifying packages to install within container. If specified, container base image is always (re)built."
+  echo "    -p package-name, --package=package-name                 Name of package to install from alpine repositories."
+  echo "                                                              If specified, container base image is always (re)built."
+  echo "                                                              Default is same as executable name."
+  echo "    -r requirements-file, --requirements=requirements-file  Use a requirements file specifying packages to install within"
+  echo "                                                              container. If specified, container base image is"
+  echo "                                                              always (re)built."
   echo ""
 
   if [ "$errorCode" != "" ]; then
