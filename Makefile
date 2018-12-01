@@ -17,4 +17,4 @@ uninstall:
 	rm -f $(LIB_DIR)/dockrun-common
 
 purge: uninstall
-	$(CURDIR)/bin/dockclean
+	$(CURDIR)/src/bin/dockclean

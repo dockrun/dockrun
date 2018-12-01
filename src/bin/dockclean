@@ -1,10 +1,15 @@
 #!/bin/bash
 
+currentDir=$(dirname $0)
+. $currentDir/../lib/dockrun-common
+
+dockerExec=$(getDockerExec)
+
 # Remove all images containing dockrun
-images=$(docker images |grep dockrun |grep image |awk '{print $3}')
+images=$($dockerExec images |grep dockrun |grep image |awk '{print $3}')
 
 for image in $images
 do
-  docker rmi $image
+  $dockerExec rmi $image
 done
 
