@@ -20,8 +20,9 @@ usage()
   echo ""
   echo "$appName [arguments] executeable [executableArguments]"
   echo ""
-  echo "    -h --help"
-  echo "    --package=package-name      Name of package to install from alpine repositories. If specified, container base image is always (re)built. Default is same as executable name."
+  echo "    -h, --help"                                             Prints this help text.
+  echo "    -p package-name, --package=package-name                 Name of package to install from alpine repositories. If specified, container base image is always (re)built. Default is same as executable name."
+  echo "    -r requirements-file, --requirements=requirements-file  Use a requirements file specifying packages to install within container. If specified, container base image is always (re)built."
   echo ""
 
   if [ "$errorCode" != "" ]; then
@@ -33,7 +34,7 @@ usage()
 buildimage()
 {
   local imagename=$1
-  local package=$2
+  local requirements=$2
   local dfiledir=$3
   local dockerExec=$(getDockerExec)
 
@@ -52,7 +53,7 @@ buildimage()
   # Build an image containing our command
   cat > $dfile << _EOF_
 FROM alpine:latest
-RUN apk update && apk add $package
+RUN apk update && apk add $requirements
 WORKDIR /root
 _EOF_
 $dockerExec build -t $imagename $dfiledir
@@ -73,17 +74,44 @@ fi
 
 # Parse args
 while [ "$(echo $1 | head -c 1)" == "-" ]; do
-  PARAM=`echo $1 | awk -F= '{print $1}'`
-  VALUE=`echo $1 | awk -F= '{print $2}'`
-  case $PARAM in
+  param=`echo $1 | awk -F= '{print $1}'`
+  longValue=`echo $1 | awk -F= '{print $2}'`
+  shortValue=$2
+  case $param in
     -h | --help)
       usage $0
       exit
       ;;
     --package)
-      if [ "$VALUE" != "" ]
+      if [ "$longValue" != "" ]
       then
-        package=$VALUE
+        package=$longValue
+      else
+        usage $0 "Incorrect usage" 2
+      fi
+      ;;
+    -p)
+      if [ "$shortValue" != "" ]
+      then
+        package=$shortValue
+      else
+        usage $0 "Incorrect usage" 2
+      fi
+      shift
+      ;;
+    -r)
+      if [ "$shortValue" != "" ]
+      then
+        requirementsFile=$shortValue
+      else
+        usage $0 "Incorrect usage" 2
+      fi
+      shift
+      ;;
+    --requirements)
+      if [ "$longValue" != "" ]
+      then
+        requirementsFile=$longValue
       else
         usage $0 "Incorrect usage" 2
       fi
@@ -100,8 +128,12 @@ app=$1
 arguments="${@:2}"
 dateStr=$(date +%Y-%m-%d_%H:%M)
 
-# If the user did not specify package, use app name
-if [ "$package" == "" ]
+# If the user specified a requirements file, force build image
+if [ "$requirementsFile" != "" ]
+then
+  package=$(cat $requirementsFile | sed ':a;N;$!ba;s/\n/ /g')
+  forceBuild=true
+elif [ "$package" == "" ] # If the user did not specify package, use app name
 then
   package=$app
 else # If user specified package, force building base image
@@ -124,11 +156,11 @@ imageExist=$?
 
 if [ $imageExist -ne 0 ]
 then
-  buildimage $imagename $package $dfiledir
+  buildimage $imagename "$package" $dfiledir
 elif [ $forceBuild ]
 then
   $dockRm $app $arguments
-  buildimage $imagename $package $dfiledir
+  buildimage $imagename "$package" $dfiledir
 fi
 
 # Run a container of said image, then cleanup
