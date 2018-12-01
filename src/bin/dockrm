@@ -1,5 +1,8 @@
 #!/bin/bash
 
+currentDir=$(dirname $0)
+. $currentDir/../lib/dockrun-common
+
 if [ $# -ne 0 ]
 then
   imagename=dockrun-$@-image
@@ -10,10 +13,11 @@ else
 fi
 
 # Check if container exists
-docker images |grep $imagename > /dev/null
+dockerExec=$(getDockerExec)
+$dockerExec images |grep $imagename > /dev/null
 if [ $? -eq 0 ]
 then
-  docker rmi $imagename
+  $dockerExec rmi $imagename
 else
   echo "Container does not exist!"
   exit 2

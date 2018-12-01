@@ -1,0 +1,35 @@
+#!/bin/bash
+
+getSystemPath()
+{
+  local inPath=$1
+
+  if grep -q Microsoft /proc/version
+  then
+    echo $(wslpath -w $inPath)
+  else
+    echo $inPath
+  fi
+}
+
+getDockerExec()
+{
+  # Detect if we are running in WSL, if so use the Windows binary
+  if grep -q Microsoft /proc/version
+  then
+    echo "docker.exe"
+  else
+    echo "docker"
+  fi
+}
+
+getHome()
+{
+  if grep -q Microsoft /proc/version
+  then
+    echo "$WINHOME"
+  else
+    echo "$HOME"
+  fi
+
+}

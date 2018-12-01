@@ -1,10 +1,13 @@
 #!/bin/bash
 
+currentDir=$(dirname $0)
+. $currentDir/../lib/dockrun-common
+
 usage()
 {
-  appName=$1
-  errorMsg=$2
-  errorCode=$3
+  local appName=$1
+  local errorMsg=$2
+  local errorCode=$3
 
   if [ "$appName" == "" ]; then
     appName=dockrun
@@ -12,10 +15,11 @@ usage()
 
   if [ "$errorMsg" != "" ]; then
     echo "ERROR: $errorMsg"
-    echo ""
   fi
 
+  echo ""
   echo "$appName [arguments] executeable [executableArguments]"
+  echo ""
   echo "    -h --help"
   echo "    --package=package-name      Name of package to install from alpine repositories. If specified, container base image is always (re)built. Default is same as executable name."
   echo ""
@@ -28,15 +32,22 @@ usage()
 
 buildimage()
 {
-  imagename=$1
-  package=$2
-  dfiledir=$3
+  local imagename=$1
+  local package=$2
+  local dfiledir=$3
+  local dockerExec=$(getDockerExec)
+
+  # If WSL, create win path
+  if grep -q Microsoft /proc/version
+  then
+    dfiledir=$(wslpath -w $dfiledir)
+  fi
 
   echo ""
   echo "Building new image $imagename"
   echo "---"
   # Pull latest alpine (our base)
-  docker pull alpine
+  $dockerExec pull alpine
 
   # Build an image containing our command
   cat > $dfile << _EOF_
@@ -44,11 +55,11 @@ FROM alpine:latest
 RUN apk update && apk add $package
 WORKDIR /root
 _EOF_
-docker build -t $imagename $dfiledir
+$dockerExec build -t $imagename $dfiledir
 
   if [ $? -ne 0 ]
   then
-    echo "Failed to build docker container!"
+    echo "Failed to build $dockerExec container!"
     exit 2
   fi
   rm -rf $dfiledir
@@ -70,8 +81,15 @@ while [ "$(echo $1 | head -c 1)" == "-" ]; do
       exit
       ;;
     --package)
-      package=$VALUE
+      if [ "$VALUE" != "" ]
+      then
+        package=$VALUE
+      else
+        usage $0 "Incorrect usage" 2
+      fi
       ;;
+    -* | --*)
+      usage $0 "Incorrect usage" 2
   esac
   shift
 done
@@ -93,12 +111,15 @@ fi
 containername=dockrun-$1
 imagename=$containername-image
 
-dfiledir=$HOME/.dockrun/$imagename-$dateStr
+dfiledir=$(getHome)/.dockrun/$imagename-$dateStr
 dfile=$dfiledir/Dockerfile
 mkdir -p $dfiledir
 
+# Docker exec name
+dockerExec=$(getDockerExec)
+
 # Check if an image already exists, if not build it
-docker images |grep $imagename > /dev/null
+$dockerExec images |grep $imagename > /dev/null
 imageExist=$?
 
 if [ $imageExist -ne 0 ]
@@ -111,6 +132,6 @@ then
 fi
 
 # Run a container of said image, then cleanup
-docker run --name $containername -e DISPLAY=host.docker.internal:0 -v /private/tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/root $imagename $app $arguments
-docker container rm $containername
+$dockerExec run --name $containername -v $(getSystemPath $(pwd)):/root $imagename $app $arguments
+$dockerExec container rm $containername
 
