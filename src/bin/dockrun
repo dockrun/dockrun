@@ -165,5 +165,11 @@ fi
 
 # Run a container of said image, then cleanup
 $dockerExec run --name $containername -v $(getSystemPath $(pwd)):/root $imagename $app $arguments
-$dockerExec container rm $containername
+
+cleanupValue=$($dockerExec container rm $containername)
+if [ "$cleanupValue" != "$containername" ]
+then
+  echo "Failed to remove temporary container: $containername"
+  exit 4
+fi
 

@@ -1,10 +1,28 @@
 #!/bin/bash
 
+getPosixOrWindows()
+{
+  if [ "$OSTYPE" == "linux-gnu" ]
+  then
+    if grep -q Microsoft /proc/version
+    then
+      echo "windows"
+      return 0
+    else
+      echo "posix"
+      return 0
+    fi
+  fi
+  echo "posix"
+  return 0
+}
+
 getSystemPath()
 {
   local inPath=$1
+  local windows=$(getPosixOrWindows)
 
-  if grep -q Microsoft /proc/version
+  if [ "$windows" == "windows" ]
   then
     echo $(wslpath -w $inPath)
   else
@@ -15,7 +33,9 @@ getSystemPath()
 getDockerExec()
 {
   # Detect if we are running in WSL, if so use the Windows binary
-  if grep -q Microsoft /proc/version
+  local windows=$(getPosixOrWindows)
+
+  if [ "$windows" == "windows" ]
   then
     echo "docker.exe"
   else
@@ -25,7 +45,9 @@ getDockerExec()
 
 getHome()
 {
-  if grep -q Microsoft /proc/version
+  local windows=$(getPosixOrWindows)
+
+  if [ "$windows" == "windows" ]
   then
     echo "$WINHOME"
   else
