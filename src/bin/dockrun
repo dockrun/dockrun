@@ -43,7 +43,7 @@ buildimage()
   local dockerExec=$(getDockerExec)
 
   # If WSL, create win path
-  if grep -q Microsoft /proc/version
+  if [ "$(getPosixOrWindows)" = "windows" ]
   then
     dfiledir=$(wslpath -w $dfiledir)
   fi
