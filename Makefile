@@ -6,8 +6,6 @@ ETC_DIR ?= $(PREFIX)/etc
 
 CURR_DIR =$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
-$(info $$CURR_DIR is [${CURR_DIR}])
-
 .PHONY: uninstall install purge
 
 install: $(CURR_DIR)/src/bin/dockrun $(CURR_DIR)/src/bin/dockrm $(CURR_DIR)/src/lib/dockrun-common
