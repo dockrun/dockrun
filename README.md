@@ -45,6 +45,8 @@ make purge
 ```
 -------
 
+[![asciicast](https://asciinema.org/a/s2wGUOepq4gjrt73ZRzQ9p7o4.svg)](https://asciinema.org/a/s2wGUOepq4gjrt73ZRzQ9p7o4)
+
 ## Usage examples
 
 Run a simple command in container:
