@@ -1,0 +1,10 @@
+sudo: bash
+
+services:
+  - docker
+
+install:
+- cd src/bin
+
+script:
+- ./dockrun wget https://dockrun.github.io
