@@ -4,7 +4,7 @@ services:
   - docker
 
 install:
-- cd src/bin
+- sudo make install
 
 script:
-- ./dockrun wget https://dockrun.github.io
+-  dockrun wget https://dockrun.github.io
