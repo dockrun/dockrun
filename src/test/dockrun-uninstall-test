@@ -1,0 +1,36 @@
+#!/bin/bash
+trap "exit 1" TERM
+export TOP_PID=$$
+
+RESULT=0
+
+fileExists () {
+    if [ -f $1 ]; then
+        echo "File $1 not uninstalled correctly"
+        kill -s TERM $TOP_PID
+    fi
+}
+
+INSTALL_DIR=/usr/local
+BINARY_DIR=$INSTALL_DIR/bin
+LIBRARY_DIR=$INSTALL_DIR/lib
+
+DOCKRM=$BINARY_DIR/dockrm
+DOCKRUN=$BINARY_DIR/dockrun
+DOCKRUN_COMMON=$LIBRARY_DIR/dockrun-common
+
+echo ""
+echo "Uninstalling dockrun"
+echo ""
+
+make uninstall
+
+echo "Verify that all files where removed"
+echo ""
+
+fileExists $DOCKRM
+fileExists $DOCKRUN
+fileExists $DOCKRUN_COMMON
+
+echo "All tests passed"
+echo ""

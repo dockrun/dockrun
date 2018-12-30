@@ -8,3 +8,4 @@ install:
 
 script:
 -  dockrun wget https://dockrun.github.io
+- ./src/test/dockrun-uninstall-test
