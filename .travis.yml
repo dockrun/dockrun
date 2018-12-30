@@ -6,9 +6,10 @@ services:
 install:
 - sudo make install
 
-script:
-
-
+notifications:
+  email:
+    on_success: change
+    on_failure: change
 
 jobs:
   include:
