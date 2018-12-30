@@ -1,0 +1,48 @@
+#!/bin/bash
+trap "exit 1" TERM
+export parentPid=$$
+
+result=0
+
+file-exists () {
+    if [ -f $1 ]; then
+        echo "File $1 not uninstalled correctly"
+        kill -s TERM $parentPid
+    fi
+}
+
+installDir=/usr/local
+binaryDir=$installDir/bin
+libraryDir=$installDir/lib
+
+dockrm=$binaryDir/dockrm
+dockrun=$binaryDir/dockrun
+dockrunCommon=$libraryDir/dockrun-common
+
+echo ""
+echo "Uninstalling dockrun..."
+echo ""
+
+make purge
+
+echo "Verify that all files where removed..."
+echo ""
+
+file-exists $dockrm
+file-exists $dockrun
+file-exists $dockrunCommon
+
+echo "Verify that all dockrun images were removed..."
+echo ""
+
+dockrunImages=$(docker images |grep dockrun |awk '{print $1}')
+if [ "$dockrunImages" != "" ]
+then
+  echo "Images remaining in docker: "
+  echo $dockrunImages
+  echo ""
+  kill -s TERM $parentPid
+fi
+
+echo "All tests passed!"
+echo ""

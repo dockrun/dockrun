@@ -1,4 +1,5 @@
 # dockrun
+[![Build Status](https://travis-ci.org/dockrun/dockrun.svg?branch=master)](https://travis-ci.org/dockrun/dockrun)
 
 Simple scripts for running commands within alpine docker container, and simple aliased removal of docker images.
 
