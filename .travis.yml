@@ -13,8 +13,10 @@ script:
 jobs:
   include:
     - stage: Test
+      name: "Test commands"
       script:
       -  dockrun wget https://dockrun.github.io
     - # stage name not required, will continue to use `Test`
+      name: "Test uninstall"
       script:
       - sudo ./src/test/dockrun-uninstall-test
