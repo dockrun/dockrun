@@ -7,5 +7,14 @@ install:
 - sudo make install
 
 script:
--  dockrun wget https://dockrun.github.io
-- ./src/test/dockrun-uninstall-test
+
+
+
+jobs:
+  include:
+    - stage: Test
+      script:
+      -  dockrun wget https://dockrun.github.io
+    - # stage name not required, will continue to use `Test`
+      script:
+      - sudo ./src/test/dockrun-uninstall-test
