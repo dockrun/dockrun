@@ -22,3 +22,6 @@ uninstall:
 
 purge: uninstall
 	$(CURR_DIR)/src/bin/dockclean
+
+debianpackage:
+	$(CURR_DIR)/tool/package/debian/package

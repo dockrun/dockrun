@@ -20,4 +20,4 @@ jobs:
     - # stage name not required, will continue to use `Test`
       name: "Test uninstall"
       script:
-      - sudo ./src/test/dockrun-uninstall-test
+      - sudo ./tool/test/dockrun-uninstall-test

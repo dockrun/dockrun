@@ -1,0 +1,38 @@
+#!/bin/sh
+set -e
+
+thisScript=$(readlink -f "$0")
+thisFolder=$(dirname "$thisScript")
+
+tag=$(git describe --exact-match --tags $(git log -n1 --pretty='%h') | cat)
+if [ "$tag" = "" ]
+then
+  tag=$(date "+%Y-%m-%d_%H-%M")
+  echo "Git not checked out on tag - using date-time as tag..."
+  echo ""
+fi
+
+version=$(echo $tag |grep -P "\d+(\.\d+)+" | cat)
+
+if [ "$version" = "" ]
+then
+  version="0.0.0"
+fi
+
+echo "Packaging:"
+echo "Tag: $tag"
+echo "Version: $version"
+
+logFile=package-$tag-$version.log
+packageFolder=$thisFolder/dockrun-$tag
+
+# Run the packaging script
+$thisFolder/src/package.sh $version $tag >$logFile 2>&1
+if [ $? -ne 0 ]
+then
+  echo "Failed to create package. See $logFile for details!"
+fi
+
+# Cleanup
+rm -rf $packageFolder
+mv $packageFolder.deb ./
