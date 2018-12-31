@@ -1,23 +1,24 @@
 language: bash
-
-services:
-  - docker
-
-install:
-- sudo make install
-
 notifications:
   email:
     on_success: change
     on_failure: change
-
-jobs:
-  include:
-    - stage: Test
-      name: "Test commands"
-      script:
-      -  dockrun wget https://dockrun.github.io
-    - # stage name not required, will continue to use `Test`
-      name: "Test uninstall"
-      script:
-      - sudo ./tool/test/dockrun-uninstall-test
+services:
+- docker
+install:
+- sudo make install
+script:
+- dockrun wget https://dockrun.github.io
+- sudo ./tool/test/dockrun-uninstall-test
+- make debianpackage
+deploy:
+  provider: releases
+  api_key:
+    secure: lbB/YIKqjQOzYbvIJiHSixuPkN5kj74nkEQNl1JDGzCyaq+hGwU0ehaBoXB+6zWuo3dHH4b/wB13RUiJWompccV7r4HR9ZGgR53fx4O39dk+9i+q1/3/EFhtIryo37QjWs7jDXAGGl7S/qTLQFbDAeHbLynugttrVY4ipcLj885m6NObjFINNhu4KpOZZrZKiYOc++sNBD13TEOAcZvgS4m+ogdfECaYzVIA2IWzGXxVGLuL9jw9sTNxVNnNCi08i9ZF65yDQIYWnfiSVmighmeKcWb/bf53fS1vjCcNeDdHsOYKgoemGGryc+4DkpKDxGyXGt7jq4OAG/E+i5W435IjPpKO12dObE0g3HvDP5Ty3du91ySx9G0aHFQrT/KLxSb+SIe0vt0d7eU5i8N6bnhZ+8F45DuRarhz5v+mS95sObzyoR+a0Ov1Y0O5c0JNdkA1DRi0MbjEjfv3A5IqUXc+Z3Tseu38nQLqgonRl0bXhgQj4tbPA/HxCr/9Lc2xQk0RTMdFuSmp2EBq0wFzDlwgQuLtNZs3fr5YADW3OcdhR8FwVd7IArXP+RigZFHQU3kswqhrOHaKuavn2cZCq1iX5OzFyrWR57I37zV62bD4AbARKh02z8RG0VXi0Bovi7YerACY6nCRzwAyjy29eqnGQjeIWug3cHzEweGzD7U=
+  file_glob: true
+  file: "*.deb"
+  skip_cleanup: true
+  on:
+    repo: dockrun/dockrun
+    all_branches: true
+    tag: true
