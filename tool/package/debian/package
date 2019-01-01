@@ -7,8 +7,8 @@ thisFolder=$(dirname "$thisScript")
 tag=$(git describe --exact-match --tags $(git log -n1 --pretty='%h') | cat)
 if [ "$tag" = "" ]
 then
-  tag=$(date "+%Y-%m-%d_%H-%M")
-  echo "Git not checked out on tag - using date-time as tag..."
+  tag=$(git rev-parse --short HEAD)
+  echo "Git not checked out on tag - using commit hash as tag..."
   echo ""
 fi
 
@@ -27,6 +27,8 @@ logFile=package-$tag-$version.log
 packageFolder=$thisFolder/dockrun-$tag
 
 # Run the packaging script
+echo ""
+echo "Creating package, see logfile $logFile for details..."
 $thisFolder/src/package.sh $version $tag >$logFile 2>&1
 if [ $? -ne 0 ]
 then
@@ -35,4 +37,3 @@ fi
 
 # Cleanup
 rm -rf $packageFolder
-mv $packageFolder.deb ./

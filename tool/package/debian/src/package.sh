@@ -26,4 +26,4 @@ _EOF_
 
 # Install dockrun
 PREFIX=$packageFolder make install -f $srcFolder/Makefile
-dpkg-deb --build $packageFolder
+dpkg-deb --build $packageFolder dockrun-$tag.deb
