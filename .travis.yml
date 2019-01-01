@@ -21,4 +21,4 @@ deploy:
   on:
     repo: dockrun/dockrun
     all_branches: true
-    tag: true
+    tags: true
